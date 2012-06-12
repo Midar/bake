@@ -1,0 +1,73 @@
+// vim: se ft=javascript sw=2 et:
+{
+  recipe: {version: 1},
+  // On each level, the same properties can be used
+  ingredients: ["objfw"],      // Inherit the flags from the objfw ingredient
+  debug: true,                  // Do a debug build
+  includedirs: ["src", "src/exceptions"],
+  conditional: [
+    {
+      // Only add those flags if the ObjC compiler is GCC-compatible
+      if: "objc_gcc_compatible",
+      then: { objcflags: ["-Wall", "-Werror", "-pipe"] }
+    }
+  ],
+  targets: {
+    "bake": {
+      files: {
+        // Empty means same directory
+        "src": [
+          "Buildinfo.m",
+          "Compiler.m",
+          "Ingredient.m",
+          "IngredientProducer.m",
+          "ObjCCompiler.m",
+          "Recipe.m",
+          "Target.m",
+        ],
+        "src/exceptions": [
+          "CommandFailedException.m",
+          "CompilationFailedException.m",
+          "LinkingFailedException.m",
+          "IngredientMissingException.m",
+          "WrongVersionException.m"
+        ]
+      },
+      // Files can also be compiled and linked conditionally
+      conditional: [
+        {
+          if: "true",
+          then: { files: { "src": ["Bake.m"] } }
+        }
+      ],
+      // Build libbake first, so we can link it
+//      dependencies: ["libbake"],
+//      libs: ["bake"],
+//      libdirs: ["."],
+      install: true
+    },
+    /*
+     * Library targets can start with "lib". In this case, the prefix is
+     * stripped and replaced by the platform-specific shared library prefix.
+     * The platform-specific shared library suffix is always appended.
+     */
+    //"libbake": {
+    //  files: [
+    //  ],
+    //  shared_lib: [0, 0],       // Shared lib version is 0.0
+    //  static_lib: true,         // Also build a static version of the lib
+    //  install: true,            // Install the file the target built
+    //  install_headers: {
+    //    /*
+    //     * Installs all headers for the specified source files into the
+    //     * directory bake in the includes directory. This is done by removing
+    //     * the extension and appending .h instead.
+    //     *
+    //     * "headers_for_sources" is a special term that builds a file list
+    //     * automatically. You can also specify an array of files here.
+    //     */
+    //    "bake": "headers_for_sources"
+    //  }
+    //}
+  }
+}
