@@ -1,6 +1,6 @@
 #import "Ingredient.h"
 
-#import "IngredientMissingException.h"
+#import "MissingIngredientException.h"
 #import "WrongVersionException.h"
 
 // FIXME
@@ -24,7 +24,7 @@ static OFMutableDictionary *ingredients = nil;
 	pool = [[OFAutoreleasePool alloc] init];
 
 	if ((path = [Ingredient findIngredient: name]) == nil)
-		@throw [IngredientMissingException exceptionWithClass: self
+		@throw [MissingIngredientException exceptionWithClass: self
 						       ingredientName: name];
 
 	ingredient = [[[Ingredient alloc] initWithFile: path] autorelease];

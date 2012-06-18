@@ -1,6 +1,6 @@
 #import <ObjFW/ObjFW.h>
 
-@interface IngredientMissingException: OFException
+@interface MissingIngredientException: OFException
 {
 	OFString *ingredientName;
 }

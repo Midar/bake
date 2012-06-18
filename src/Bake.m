@@ -1,12 +1,14 @@
 #import "Bake.h"
 #import "Compiler.h"
+#import "DependencySolver.h"
 #import "ObjCCompiler.h"
 #import "Target.h"
 #import "IngredientProducer.h"
 
 #import "CompilationFailedException.h"
 #import "LinkingFailedException.h"
-#import "IngredientMissingException.h"
+#import "MissingDependencyException.h"
+#import "MissingIngredientException.h"
 #import "WrongVersionException.h"
 
 OF_APPLICATION_DELEGATE(Bake)
@@ -16,9 +18,10 @@ OF_APPLICATION_DELEGATE(Bake)
 {
 	OFArray *arguments;
 	OFSet *conditions;
-	OFEnumerator *keyEnumerator, *objectEnumerator;
-	OFString *name;
+	DependencySolver *dependencySolver;
+	OFEnumerator *enumerator;
 	Target *target;
+	OFArray *targetOrder;
 
 	arguments = [OFApplication arguments];
 
@@ -70,10 +73,25 @@ OF_APPLICATION_DELEGATE(Bake)
 	rebake = ([arguments containsObject: @"--rebake"] ||
 	    [arguments containsObject: @"-r"]);
 
-	keyEnumerator = [[recipe targets] keyEnumerator];
-	objectEnumerator = [[recipe targets] objectEnumerator];
-	while ((name = [keyEnumerator nextObject]) != nil &&
-	    (target = [objectEnumerator nextObject]) != nil) {
+	dependencySolver = [[[DependencySolver alloc] init] autorelease];
+
+	enumerator = [[recipe targets] objectEnumerator];
+	while ((target = [enumerator nextObject]) != nil)
+		[dependencySolver addTarget: target];
+
+	@try {
+		[dependencySolver solve];
+	} @catch (MissingDependencyException *e) {
+		[of_stderr writeFormat: @"Error: Target %@ is missing, but "
+					@"specified as dependency!\n",
+					[e dependencyName]];
+		[OFApplication terminateWithStatus: 1];
+	}
+
+	targetOrder = [dependencySolver targetOrder];
+
+	enumerator = [targetOrder objectEnumerator];
+	while ((target = [enumerator nextObject]) != nil) {
 		OFEnumerator *fileEnumerator;
 		OFString *file;
 		size_t i = 0;
@@ -83,15 +101,12 @@ OF_APPLICATION_DELEGATE(Bake)
 
 		@try {
 			[target addIngredients];
-		} @catch (IngredientMissingException *e) {
+		} @catch (MissingIngredientException *e) {
 			[of_stderr writeFormat: @"Error: Ingredient %@ "
 						@"missing!\n",
 						[e ingredientName]];
 			[OFApplication terminateWithStatus: 1];
 		}
-
-		if ([target files] == nil || [[target files] count] == 0)
-			continue;
 
 		fileEnumerator = [[target files] objectEnumerator];
 		while ((file = [fileEnumerator nextObject]) != nil) {
@@ -131,7 +146,9 @@ OF_APPLICATION_DELEGATE(Bake)
 							[[target files] count]];
 		}
 
-		if (link) {
+		if (link || ([[target files] count] > 0 &&
+		    ![OFFile fileExistsAtPath: [[ObjCCompiler sharedCompiler]
+		    outputFileForTarget: target]])) {
 			if (!verbose)
 				[of_stdout writeFormat:
 				    @"\r%@: %zd/%zd (linking)",

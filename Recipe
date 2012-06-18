@@ -19,6 +19,8 @@
         "src": [
           "Buildinfo.m",
           "Compiler.m",
+          "DependencyNode.m",
+          "DependencySolver.m",
           "Ingredient.m",
           "IngredientProducer.m",
           "ObjCCompiler.m",
@@ -26,10 +28,12 @@
           "Target.m",
         ],
         "src/exceptions": [
+          "CircularDependencyException.m",
           "CommandFailedException.m",
           "CompilationFailedException.m",
           "LinkingFailedException.m",
-          "IngredientMissingException.m",
+          "MissingDependencyException.m",
+          "MissingIngredientException.m",
           "WrongVersionException.m"
         ]
       },
@@ -46,6 +50,9 @@
 //      libdirs: ["."],
       install: true
     },
+    "a": {dependencies: ["b"]},
+    "b": {dependencies: ["bake"]},
+    "e": {dependencies: ["a"]},
     /*
      * Library targets can start with "lib". In this case, the prefix is
      * stripped and replaced by the platform-specific shared library prefix.

@@ -1,20 +1,20 @@
-#import "ingredientMissingException.h"
+#import "MissingDependencyException.h"
 
-@implementation IngredientMissingException
+@implementation MissingDependencyException
 + exceptionWithClass: (Class)class
-      ingredientName: (OFString*)ingredientName
+      dependencyName: (OFString*)dependencyName
 {
 	return [[[self alloc] initWithClass: class
-			     ingredientName: ingredientName] autorelease];
+			     dependencyName: dependencyName] autorelease];
 }
 
 -  initWithClass: (Class)class
-  ingredientName: (OFString*)ingredientName_
+  dependencyName: (OFString*)dependencyName_
 {
 	self = [super initWithClass: class];
 
 	@try {
-		ingredientName = [ingredientName_ copy];
+		dependencyName = [dependencyName_ copy];
 	} @catch (id e) {
 		[self release];
 		@throw e;
@@ -33,13 +33,13 @@
 
 - (void)dealloc
 {
-	[ingredientName release];
+	[dependencyName release];
 
 	[super dealloc];
 }
 
-- (OFString*)ingredientName
+- (OFString*)dependencyName
 {
-	return ingredientName;
+	return dependencyName;
 }
 @end
