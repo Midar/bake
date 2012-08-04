@@ -22,22 +22,23 @@ OF_APPLICATION_DELEGATE(Bake)
 	OFEnumerator *enumerator;
 	Target *target;
 	OFArray *targetOrder;
+	BOOL install;
+	OFString *prefix = @"/usr/local";
+	OFString *bindir = [prefix stringByAppendingString: @"/bin"];
 
 	arguments = [OFApplication arguments];
+	install = [arguments containsObject: @"--install"];
 
 	if ([arguments containsObject: @"--produce-ingredient"]) {
 		IngredientProducer *producer;
-		OFMutableArray *tmp;
 		OFEnumerator *enumerator;
 		OFString *argument;
 
 		producer = [[IngredientProducer alloc] init];
 
-		// FIXME: arrayByRemovingObject?
-		tmp = [[arguments mutableCopy] autorelease];
-		[tmp removeObject: @"--produce-ingredient"];
-
-		enumerator = [tmp objectEnumerator];
+		arguments = [arguments
+		    arrayByRemovingObject: @"--produce-ingredient"];
+		enumerator = [arguments objectEnumerator];
 		while ((argument = [enumerator nextObject]) != nil)
 			[producer parseArgument: argument];
 
@@ -178,6 +179,24 @@ OF_APPLICATION_DELEGATE(Bake)
 		} else
 			[of_stdout writeFormat: @"%@: Already up to date\n",
 						[target name]];
+
+		if (install && [[target files] count] > 0) {
+			OFString *file = [[ObjCCompiler sharedCompiler]
+			    outputFileForTarget: target];
+			OFString *destination = [OFString stringWithPath:
+			    bindir, [file lastPathComponent], nil];
+
+
+			[of_stdout writeFormat: @"Installing: %@ -> %@\n",
+						file, destination];
+
+			if (![OFFile directoryExistsAtPath: bindir])
+				[OFFile createDirectoryAtPath: bindir
+						createParents: YES];
+
+			[OFFile copyFileAtPath: file
+					toPath: destination];
+		}
 	}
 }
 
