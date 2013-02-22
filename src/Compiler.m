@@ -27,14 +27,14 @@
 - (void)compileFile: (OFString*)file
 	     target: (Target*)target
 {
-	@throw [OFNotImplementedException exceptionWithClass: isa
+	@throw [OFNotImplementedException exceptionWithClass: [self class]
 						    selector: _cmd];
 }
 
 - (void)linkTarget: (Target*)target
 	extraFlags: (OFString*)extraFlags
 {
-	@throw [OFNotImplementedException exceptionWithClass: isa
+	@throw [OFNotImplementedException exceptionWithClass: [self class]
 						    selector: _cmd];
 }
 @end

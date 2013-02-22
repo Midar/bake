@@ -3,7 +3,7 @@
   recipe: {version: 1},
   // On each level, the same properties can be used
   ingredients: ["objfw"],      // Inherit the flags from the objfw ingredient
-  debug: true,                  // Do a debug build
+  debug: true,                 // Do a debug build
   includedirs: ["src", "src/exceptions"],
   conditional: [
     {

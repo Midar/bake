@@ -45,7 +45,7 @@ OF_APPLICATION_DELEGATE(Bake)
 		[of_stdout writeLine:
 		    [[producer ingredient] JSONRepresentation]];
 
-		return;
+		[OFApplication terminate];
 	}
 
 	[self findRecipe];
@@ -198,6 +198,8 @@ OF_APPLICATION_DELEGATE(Bake)
 					toPath: destination];
 		}
 	}
+
+	[OFApplication terminate];
 }
 
 - (void)findRecipe
@@ -205,7 +207,7 @@ OF_APPLICATION_DELEGATE(Bake)
 	OFString *oldPath = [OFFile currentDirectoryPath];
 
 	while (![OFFile fileExistsAtPath: @"Recipe"]) {
-		[OFFile changeToDirectory: OF_PATH_PARENT_DIR];
+		[OFFile changeToDirectoryAtPath: OF_PATH_PARENT_DIRECTORY];
 
 		/* We reached the file system root */
 		if ([[OFFile currentDirectoryPath] isEqual: oldPath])
@@ -233,8 +235,8 @@ OF_APPLICATION_DELEGATE(Bake)
 	if (![OFFile fileExistsAtPath: objectFile])
 		return YES;
 
-	sourceDate = [OFFile modificationDateOfFile: file];
-	objectDate = [OFFile modificationDateOfFile: objectFile];
+	sourceDate = [OFFile modificationDateOfFileAtPath: file];
+	objectDate = [OFFile modificationDateOfFileAtPath: objectFile];
 
 	return ([objectDate compare: sourceDate] == OF_ORDERED_ASCENDING);
 }

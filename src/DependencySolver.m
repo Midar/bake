@@ -55,7 +55,7 @@
 
 		if ((dependency = [nodes objectForKey: dependencyName]) == nil)
 			@throw [MissingDependencyException
-			    exceptionWithClass: isa
+			    exceptionWithClass: [self class]
 				dependencyName: dependencyName];
 
 		if (![dependency isInTargetOrder])

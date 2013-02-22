@@ -70,8 +70,9 @@ static ObjCCompiler *sharedCompiler = nil;
 		[of_stdout writeLine: command];
 
 	if (system([command cStringWithEncoding: OF_STRING_ENCODING_NATIVE]))
-		@throw [CompilationFailedException exceptionWithClass: isa
-							      command: command];
+		@throw [CompilationFailedException
+		    exceptionWithClass: [self class]
+			       command: command];
 }
 
 - (void)linkTarget: (Target*)target
@@ -120,7 +121,7 @@ static ObjCCompiler *sharedCompiler = nil;
 		[of_stdout writeLine: command];
 
 	if (system([command cStringWithEncoding: OF_STRING_ENCODING_NATIVE]))
-		@throw [LinkingFailedException exceptionWithClass: isa
+		@throw [LinkingFailedException exceptionWithClass: [self class]
 							  command: command];
 }
 @end
